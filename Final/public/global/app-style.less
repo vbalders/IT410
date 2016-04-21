@@ -1,0 +1,136 @@
+body{
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 300;
+}
+.dark{
+  background: #676e71;
+}
+.success{
+  color: #5cb85c;
+}
+.fail{
+  color:#c91c24;
+}
+h1{
+  font-weight: 300;
+  font-size: 45px;
+  color: #337ab7;
+}
+.clear{
+  clear: both;;
+}
+.top-banner{
+  width: 100%;
+  background: @byu-blue;
+  color: #fff;
+  padding: 15px;
+
+  h3{
+    line-height: 15px;
+  }
+
+
+}
+.well{
+  padding: 0;
+  border: 0px;
+  .time{
+    width: 20%;
+    font-size: 28px;
+    padding: 10px;
+    float: left;
+    padding: 18px  15px;
+
+  }
+  .actions{
+    width: 40%;
+    float: left;
+    padding:18px  15px;
+  }
+  .status{
+    width: 31%;
+    float: left;
+    padding: 18px  15px;
+    .clocked-status{
+      font-weight: 400;
+      font-size: 23px;
+      color: #838a94;
+      .success{
+        color: #5cb85c;
+      }
+      .fail{
+        color:#c91c24;
+      }
+
+    }
+  }
+  .status_details{
+    width: 100%;
+    float: left;
+    padding: 18px  15px;
+    .clocked-status{
+
+      font-size: 20px;
+    }
+  }
+}
+.disable{
+    background: gray !important;
+    border-color: gray !important;
+    &:hover{
+      background: gray !important;
+      border-color: gray !important;
+    }
+    &:focus{
+      background: gray !important;
+      border-color: gray !important;
+    }
+}
+.uname{
+  padding-top: 15px;
+  padding-bottom: 15px;
+  line-height: 20px;
+  margin: 0;
+  color: #fff;
+}
+.icons{
+  margin-top: 5%;
+  padding: 2.5% 0;
+  min-height: 200px;
+  border: 1px solid #337ab7;
+  border-radius: 10px;
+  a{
+    text-decoration: none;
+  }
+  p{
+
+    font-weight: 400;
+    font-size: 28px;
+    color: #46a2de;
+  }
+  i{
+    display: block;
+    text-align: center;
+    font-size: 100px;
+    margin-bottom: 2.5%;
+    color: #114477;
+  }
+  &:hover{
+    background: @byu-blue;
+    p{
+      color: #fff;
+    }
+    i{
+      color: #fff;
+    }
+  }
+}
+.btn-blue{
+  background: @byu-blue;
+  color: #fff;
+  &:hover{
+    color: #fff;
+    background: lighten(@byu-blue, 10%);
+  }
+}

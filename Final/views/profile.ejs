@@ -1,0 +1,262 @@
+<!-- views/profile.ejs -->
+<!doctype html>
+<html>
+<head>
+	<title>Y Clock</title>
+	<link rel="shortcut icon" href="https://home.byu.edu/home/sites/all/themes/byu_responsive/favicon.ico" type="image/vnd.microsoft.icon">
+	<link rel="stylesheet" href="/css/style.css"> <!-- load bootstrap css -->
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css"> <!-- load fontawesome -->
+	<link href='https://fonts.googleapis.com/css?family=Josefin+Sans:400,100,300,600,700' rel='stylesheet' type='text/css'>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+	<style>
+		body 		{ padding-top:80px; }
+	</style>
+	</head>
+	<body>
+	<nav class="navbar navbar-fixed-top">
+		<div class="container">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+					<span class="sr-only">Toggle navigation</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+				<a class="navbar-brand" href="#"><img src="/img/byulogo.png"></a>
+			</div>
+			<div id="navbar" class="navbar-collapse collapse">
+				<ul class="nav navbar-nav navbar-right">
+					<li><p class="uname"><i class="fa fa-user"></i> <%= user.local.email %></p></li>
+					<li><a href="/logout"><i class="fa fa-sign-out"></i> Logout</a></li>
+				</ul>
+			</div><!--/.nav-collapse -->
+		</div>
+	</nav>
+
+	<div class="col-xs-12">
+
+		<!-- LOCAL INFORMATION -->
+		<div class="col-sm-6">
+			<div class="well">
+				<div class="top-banner">
+				<h3>Current Status</h3>
+			</div>
+				<div id="time_clock" class="time"></div>
+				<div class="actions">
+						<a class="btn btn-success" href="#" id="in" data-value="1">Clock In</a>
+						<a class="btn  btn-danger" href="#" id="out" data-value="2">Clock Out</a>
+				</div>
+				<div id="status" class="status">
+					<p class="clocked-status">Clocked: <span class="fail">Out</span> </p>
+				</div>
+					<form id="time_form">
+						<input type="hidden" id="email" name="email" value="<%= user.local.email %>">
+						<input type="hidden" id="time" name="time">
+						<input type="hidden" id="type" name="type" value="1">
+					</form>
+					<div class="clear"></div>
+			</div>
+		</div>
+		<div id="result" class="col-sm-6">
+			<div class="well">
+				<div class="top-banner">
+					<h3>Time Sheet</h3>
+				</div>
+				<div class="status status_details">
+
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+</div>
+</body>
+<script>
+function startTime() {
+    var today = new Date();
+    var h = today.getHours();
+    var m = today.getMinutes();
+    var s = today.getSeconds();
+    m = checkTime(m);
+    s = checkTime(s);
+    document.getElementById('time_clock').innerHTML =
+    h + ":" + m + ":" + s;
+		document.getElementById('time').value = h + ":" + m + ":" + s;
+    var t = setTimeout(startTime, 500);
+}
+function checkTime(i) {
+    if (i < 10) {i = "0" + i};  // add zero in front of numbers < 10
+    return i;
+}
+
+startTime();
+</script>
+<script type="text/javascript">
+function tConvert (time) {
+  // Check correct time format and split into components
+  time = time.toString ().match (/^([01]\d|2[0-3])(:)([0-5]\d)(:[0-5]\d)?$/) || [time];
+
+  if (time.length > 1) { // If time format correct
+    time = time.slice (1);  // Remove full string match value
+    time[0] = +time[0] % 12 || 12; // Adjust hours
+  }
+  return time.join (''); // return adjusted time or original string
+}
+function total_hours(){
+
+		 var	total_hours_datastring= $("#time_form").serialize();
+	 	$.ajax({
+	 			 type: "POST",
+	 			 url: "/hours",
+	 			 data: total_hours_datastring,
+	 			 success: function(data){
+	 						var total_hours_Data = JSON.parse(JSON.stringify(data));
+	 						//console.log(timeData);
+							var arr = [];
+	 						$.each(total_hours_Data, function(index, value) {
+								var time_raw=value.new_date,
+										time_full=time_raw.replace(/:\d\d([ ap]|$)/,'$1'),
+										new_time=tConvert (time_full);
+								arr.push(new_time);
+
+	 						});
+							console.log(arr);
+							var sum = arr.map(function(x) {
+									return parseFloat( x.replace(':','.') );
+							}).reduce(function(a,b) { return a + b; }),
+									left = (sum - parseInt(sum, 10)).toFixed(2);
+									//console.log(left);
+							if ( left >= 0.6 ) sum = parseInt( (sum += 1), 10 ) + parseFloat((left - 0.6).toFixed(2));
+
+							var parts = sum.toString().split('.');
+							//console.log(parts);
+							parts[1] = parts[1] < 10 ? parts[1] + '0' : parts[1];
+
+							sum = parts[0] + ':' + parts[1];
+
+
+							console.log(sum)
+
+
+	 			}
+	 	});
+}
+total_hours();
+function check_status(){
+	var	status_datastring= $("#time_form").serialize();
+	$.ajax({
+			 type: "POST",
+			 url: "/status",
+			 data: status_datastring,
+			 success: function(data){
+						var statusData = JSON.parse(JSON.stringify(data));
+						console.log(statusData);
+						$.each(statusData, function(index, value) {
+							$status_type = value.type;
+						});
+						if($status_type==2){
+							$('#out').addClass('disable');
+							$('#status').html('<p class="clocked-status">Clocked: <span class="fail">Out</span> </p>');
+						}else{
+								$('#in').addClass('disable');
+								$('#status').html('<p class="clocked-status">Clocked: <span class="success">In</span> </p>');
+						}
+						/*
+							console.log(value.new_date);
+							var status;
+							var date = new Date(value.updated_at);
+
+							if(value.type==1){
+								status='<span class="success">Clocked In</span>';
+							}else{
+								status='<span class="fail">Clocked Out</span>';
+							}
+							$('#result .status_details').append('<ul class="list-unstyled list-inline"><li>'+  (date.getMonth()+1) + '-'+date.getDate()+'-' + date.getFullYear() +' </li><li> '+value.new_date+'</li><li> '+ status+'</li></ul>');
+						});*/
+							//console.log($date);
+
+			}
+	});
+}
+
+function time_table(){
+	$('#result .status_details').html('');
+	var	time_datastring= $("#time_form").serialize();
+	$.ajax({
+			 type: "POST",
+			 url: "/hours",
+			 data: time_datastring,
+			 success: function(data){
+						var timeData = JSON.parse(JSON.stringify(data));
+						//console.log(timeData);
+						$.each(timeData, function(index, value) {
+							//console.log(value.new_date);
+							var status;
+							var date = new Date(value.updated_at);
+
+							if(value.type==1){
+								status='<span class="success">In</span>';
+							}else{
+								status='<span class="fail">Out</span>';
+							}
+							$('#result .status_details').append('<ul class="list-unstyled list-inline col-xs-12 col-xs-6" ><li>'+  (date.getMonth()+1) + '-'+date.getDate()+'-' + date.getFullYear() +' </li><li> '+value.new_date+'</li><li> '+ status+'</li></ul>');
+						});
+							//console.log($date);
+							//console.log($type);
+			}
+	});
+}
+check_status();
+time_table();
+$('.btn').on('click', function(e){
+	e.preventDefault();
+	$(this).addClass('disable');
+	var set_value=$(this).data( "value" );
+	if(set_value==2){
+		$('#in').removeClass('disable');
+	}else{
+		$('#out').removeClass('disable');
+	}
+	//console.log("test: "+set_value);
+	$("#type").val(set_value);
+	var email = $("#email").val(),
+			time = $("#time").val(),
+			type = $("#type").val();
+	contact_datastring= $("#time_form").serialize();
+		//console.log("email: "+email+" time: "+time+" type:"+type);
+	save_data(contact_datastring);
+});
+function save_data(contact_datastring){
+	//console.log(contact_datastring);
+	$.ajax({
+			 type: "POST",
+			 url: "/save-time",
+			 data: contact_datastring,
+			 success: function(data){
+
+				 		var returnedData = JSON.parse(JSON.stringify(data));
+								$a = returnedData.error;
+								$type = returnedData.type;
+								$db_time = returnedData.time;
+								if(	$a == 0){
+
+										if($type==1){
+											$('#status').html('<p class="clocked-status">Clocked: <span class="success">In</span> </p>');
+												$('#result .status').append('<p class="clocked-status">Clocked: <span class="success">In</span>. You clock in at: '+$db_time+'  </p>');
+										}else{
+												$('#status').html('<p class="clocked-status">Clocked: <span class="fail">Out</span> </p>');
+												$('#result .status').append('<p class="clocked-status">Clocked: <span class="fail">Out</span>. You clock out at: '+$db_time+'  </p>');
+										}
+								}else{
+
+								}
+							console.log(returnedData);
+							time_table();
+			}
+  });
+
+
+}
+</script>
+</html>

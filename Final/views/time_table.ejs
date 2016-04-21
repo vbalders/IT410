@@ -1,0 +1,91 @@
+<!-- views/profile.ejs -->
+<!doctype html>
+<html>
+<head>
+	<title>Y Clock</title>
+	<link rel="shortcut icon" href="https://home.byu.edu/home/sites/all/themes/byu_responsive/favicon.ico" type="image/vnd.microsoft.icon">
+	<link rel="stylesheet" href="/css/style.css"> <!-- load bootstrap css -->
+	<link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css"> <!-- load fontawesome -->
+	<link href='https://fonts.googleapis.com/css?family=Josefin+Sans:400,100,300,600,700' rel='stylesheet' type='text/css'>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+	<style>
+		body 		{ padding-top:80px; }
+	</style>
+	</head>
+	<body>
+	<nav class="navbar navbar-fixed-top">
+		<div class="container">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+					<span class="sr-only">Toggle navigation</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+				<a class="navbar-brand" href="#"><img src="/img/byulogo.png"></a>
+			</div>
+			<div id="navbar" class="navbar-collapse collapse">
+				<ul class="nav navbar-nav navbar-right">
+					<li><p class="uname"><i class="fa fa-user"></i> <%= user.local.email %></p></li>
+					<li><a href="/logout"><i class="fa fa-sign-out"></i> Logout</a></li>
+				</ul>
+			</div><!--/.nav-collapse -->
+		</div>
+	</nav>
+
+	<div class="col-xs-12">
+		<form id="time_form">
+			<input type="hidden" id="email" name="email" value="<%= user.local.email %>">
+			<input type="hidden" id="time" name="time">
+			<input type="hidden" id="type" name="type" value="1">
+		</form>
+		<!-- LOCAL INFORMATION -->
+<div id="result" class="col-sm-12">
+			<div class="well">
+				<div class="top-banner">
+					<h3>Time Sheet</h3>
+				</div>
+				<div class="status status_details">
+
+
+				</div>
+			</div>
+		</div>
+	</div>
+
+</div>
+</body>
+
+<script type="text/javascript">
+
+function time_table(){
+	$('#result .status_details').html('');
+	var	time_datastring= $("#time_form").serialize();
+	$.ajax({
+			 type: "POST",
+			 url: "/hours",
+			 data: time_datastring,
+			 success: function(data){
+						var timeData = JSON.parse(JSON.stringify(data));
+						//console.log(timeData);
+						$.each(timeData, function(index, value) {
+							//console.log(value.new_date);
+							var status;
+							var date = new Date(value.updated_at);
+
+							if(value.type==1){
+								status='<span class="success">In</span>';
+							}else{
+								status='<span class="fail">Out</span>';
+							}
+							$('#result .status_details').append('<ul class="list-unstyled list-inline col-xs-12 col-xs-6" ><li>'+  (date.getMonth()+1) + '-'+date.getDate()+'-' + date.getFullYear() +' </li><li> '+value.new_date+'</li><li> '+ status+'</li></ul>');
+						});
+							//console.log($date);
+							//console.log($type);
+			}
+	});
+}
+
+time_table();
+</script>
+</html>
